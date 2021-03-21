@@ -9,8 +9,17 @@ const PORT = process.env.PORT || 3000;
 const handler = new Handler(path.join(__dirname, 'static'), '/');
 
 handler.get('/', (req, res) => {
-    res.setHeader('Location', '/dist/index.html');
-    res.writeHead(301);
+    const indexPath = path.join(__dirname, 'pages', 'index.html');
+    if (fs.existsSync(indexPath)) {
+        const data = fs.readFileSync(path.join(__dirname, 'pages', 'index.html'));
+        res.setHeader('Content-Type', 'text/html');
+        res.writeHead(200);
+        res.write(data);
+        res.end();
+        return;
+    }
+    res.writeHead(404);
+    res.write('No index page');
     res.end();
 });
 

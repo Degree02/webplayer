@@ -1,5 +1,6 @@
 module.exports = {
   outputDir: '../static/dist',
+  indexPath: '../../pages/index.html',
   publicPath: '/dist',
   css: {
     loaderOptions: {
