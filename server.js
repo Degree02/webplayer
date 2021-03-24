@@ -50,6 +50,7 @@ handler.post('/files', (req, res) => {
 
 const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+    res.setHeader('Accept-Ranges', 'bytes');
 
     handler.passRequest(req, res);
 });

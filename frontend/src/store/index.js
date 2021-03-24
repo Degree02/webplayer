@@ -9,6 +9,8 @@ export default new Vuex.Store({
     albums: [],
     songs: [],
     activeAlbum: "",
+    activeSong: "",
+    isPlaying: false,
   },
   mutations: {
     SET_ALBUMS(state, albums) {
@@ -21,6 +23,14 @@ export default new Vuex.Store({
 
     SET_ACTIVE_ALBUM(state, album) {
       state.activeAlbum = album;
+    },
+
+    SET_SONG(state, song) {
+      state.activeSong = song;
+    },
+
+    SET_ISPLAYING(state, bool) {
+      state.isPlaying = bool;
     },
   },
   actions: {
@@ -37,6 +47,11 @@ export default new Vuex.Store({
             commit("SET_ACTIVE_ALBUM", payload.name);
           }
         });
+    },
+  },
+  getters: {
+    song: (state) => (name) => {
+      return state.songs.find((song) => song.name == name);
     },
   },
 });

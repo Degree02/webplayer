@@ -55,6 +55,7 @@ class Handler {
                     }
 
                     res.setHeader('Content-Disposition', 'inline');
+                    res.setHeader('Content-Length', data.byteLength);
                     res.write(data);
                     res.end();
                     return;

@@ -36,12 +36,12 @@ export default {
   height: 100px;
   cursor: pointer;
   transition: transform 0.2s ease-in;
-  box-shadow: 2px 2px 15px 5px black;
+  box-shadow: $shadow;
   border-radius: 5px;
 
   &.active,
   &:hover {
-    transform: scale(1.5);
+    transform: $big-scaling;
   }
 
   &:hover.active {

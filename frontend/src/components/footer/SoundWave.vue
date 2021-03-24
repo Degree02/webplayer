@@ -63,7 +63,7 @@ export default {
 <style lang="scss" scoped>
 #wave {
   height: 80%;
-  fill: #fff;
+  fill: $primary;
 }
 
 @for $i from 1 through 9 {

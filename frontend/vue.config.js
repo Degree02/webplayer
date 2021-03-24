@@ -1,7 +1,7 @@
 module.exports = {
-  outputDir: '../static/dist',
-  indexPath: '../../pages/index.html',
-  publicPath: '/dist',
+  outputDir: "../static/dist",
+  indexPath: "../../pages/index.html",
+  publicPath: "/dist",
   css: {
     loaderOptions: {
       // pass options to sass-loader

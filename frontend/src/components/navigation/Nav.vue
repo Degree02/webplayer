@@ -37,15 +37,16 @@ export default {
 <style lang="scss" scoped>
 .wrapper {
   width: 100%;
-  height: 200px;
+  height: 100px;
   top: 0;
   position: fixed;
   z-index: 100;
 
   .inner {
     width: 100%;
-    height: 100%;
+    height: 200%;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-evenly;
     position: absolute;
