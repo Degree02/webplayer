@@ -3,7 +3,7 @@
     <div class="title">
       <h3>
         {{ activeSong }} <br />
-        {{ activeAlbum }}
+        {{ playingAlbum }}
       </h3>
     </div>
     <div class="controls">
@@ -72,6 +72,7 @@ export default {
       timestamp: 0,
       songPath: "",
       canUpdate: true,
+      playingAlbum: "",
     };
   },
   mounted() {
@@ -79,6 +80,7 @@ export default {
     EventBus.$on("changeSong", (song) => {
       if (this.activeSong != song) {
         this.songPath = this.toPath(song);
+        this.playingAlbum = this.activeAlbum;
         this.play();
       } else {
         if (this.$refs.audioPlayer.paused) {
@@ -130,6 +132,7 @@ export default {
       setTimeout(() => {
         this.$refs.audioPlayer.play();
       });
+      this.playingAlbum = this.activeAlbum;
       this.$store.commit("SET_SONG", nextSong);
       this.$store.commit("SET_ISPLAYING", true);
     },

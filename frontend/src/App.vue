@@ -41,7 +41,7 @@ export default {
 
 body {
   background: $background;
-  min-height: calc(100vh - 100px);
+  min-height: calc(100vh - 200px);
   color: $text-color;
 }
 </style>
