@@ -68,7 +68,6 @@ export default new Vuex.Store({
 
     fetchPlaylist({ commit }) {
       axios.get(`${process.env.VUE_APP_API_URL}playlist`, { withCredentials: true }).then(({ data }) => {
-        console.log(data);
         commit("SET_PLAYLIST", data);
       });
     },
