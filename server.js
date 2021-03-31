@@ -1,12 +1,15 @@
 const http = require("http");
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const Handler = require("./utils/Handler");
 const { respond, formatSizeUnits } = require('./utils/Helpers');
+const DBInterface = require("./utils/DBInterface");
 
 const PORT = process.env.PORT || 3000;
 
 const handler = new Handler(path.join(__dirname, 'static'), '/');
+const db = new DBInterface("playlist.db");
 
 handler.get('/', (req, res) => {
     const indexPath = path.join(__dirname, 'pages', 'index.html');
@@ -18,6 +21,7 @@ handler.get('/', (req, res) => {
         res.end();
         return;
     }
+
     res.writeHead(404);
     res.write('No index page');
     res.end();
@@ -46,6 +50,23 @@ handler.post('/files', (req, res) => {
 
     res.setHeader('Content-type', 'application/json');
     respond(res, JSON.stringify(result));
+});
+
+handler.get('/playlist', async (req, res) => {
+    const data = await db.getPlaylist();
+    res.setHeader("Content-Type", "application/json");
+    res.write(JSON.stringify(data));
+    res.end();
+});
+
+handler.post('/playlist/add', async (req, res) => {
+    await db.addSong(req.body);
+    res.end("OK");
+});
+
+handler.post('/playlist/remove', async (req, res) => {
+    await db.removeSong(req.body);
+    res.end("OK");
 });
 
 const server = http.createServer((req, res) => {

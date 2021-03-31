@@ -9,6 +9,9 @@ import {
   faForward,
   faBackward,
   faVolumeUp,
+  faPlus,
+  faMinus,
+  faList,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
@@ -18,6 +21,9 @@ library.add(faPause);
 library.add(faForward);
 library.add(faBackward);
 library.add(faVolumeUp);
+library.add(faPlus);
+library.add(faMinus);
+library.add(faList);
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 
 Vue.config.productionTip = false;

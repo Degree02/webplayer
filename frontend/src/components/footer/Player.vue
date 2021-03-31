@@ -5,6 +5,10 @@
         {{ activeSong }} <br />
         {{ playingAlbum }}
       </h3>
+      <h4 class="time">
+        {{ currentTime }} <span v-if="currentTime && duration">/</span>
+        {{ duration }}
+      </h4>
     </div>
     <div class="controls">
       <font-awesome-icon
@@ -70,6 +74,8 @@ export default {
     return {
       volume: 30,
       timestamp: 0,
+      currentTime: "",
+      duration: "",
       songPath: "",
       canUpdate: true,
       playingAlbum: "",
@@ -77,10 +83,11 @@ export default {
   },
   mounted() {
     this.$refs.audioPlayer.volume = this.volume / 100;
-    EventBus.$on("changeSong", (song) => {
+    EventBus.$on("changeSong", ({ name, album }) => {
+      const song = name;
       if (this.activeSong != song) {
+        this.playingAlbum = album;
         this.songPath = this.toPath(song);
-        this.playingAlbum = this.activeAlbum;
         this.play();
       } else {
         if (this.$refs.audioPlayer.paused) {
@@ -96,19 +103,28 @@ export default {
   },
   methods: {
     toPath(song) {
-      return `${process.env.VUE_APP_API_URL}albums/${this.activeAlbum}/mp3/${song}`;
+      return `${process.env.VUE_APP_API_URL}albums/${this.playingAlbum}/mp3/${song}`;
     },
 
     play() {
       if (!this.activeSong) {
-        this.$store.commit("SET_SONG", this.songs[0].name);
-        this.$refs.audioPlayer.src = this.toPath(this.songs[0].name);
+        let songs = this.songs;
+        if (this.playlistOpen && this.playlist.length > 0) {
+          songs = this.playlist;
+        }
+        this.$store.commit("SET_SONG", songs[0].name);
+        this.playingAlbum = this.activeAlbum;
+        if (songs[0].album) {
+          this.playingAlbum = songs[0].album;
+        }
+        this.$refs.audioPlayer.src = this.toPath(songs[0].name);
       }
 
       setTimeout(() => {
         this.$refs.audioPlayer.play();
       });
       this.$store.commit("SET_ISPLAYING", true);
+      this.$store.commit("SET_PLAYING_ALBUM", this.playingAlbum);
     },
 
     pause() {
@@ -118,31 +134,54 @@ export default {
 
     next(direction = 1) {
       if (!this.activeSong) {
+        this.playingAlbum = this.activeAlbum;
         this.play();
         return;
       }
 
-      let currentIndex = this.songs.findIndex(
+      let songs = this.songs;
+      if (this.playlistOpen && this.playlist.length > 0) {
+        songs = this.playlist;
+      }
+
+      let currentIndex = songs.findIndex(
         (song) => song.name == this.activeSong
       );
-      if (currentIndex + direction == this.songs.length) currentIndex = -1;
-      if (currentIndex + direction == -1) currentIndex = this.songs.length;
-      const nextSong = this.songs[currentIndex + direction].name;
-      this.$refs.audioPlayer.src = this.toPath(nextSong);
+
+      if (currentIndex + direction == songs.length) currentIndex = -1;
+      if (currentIndex + direction <= -1) currentIndex = songs.length;
+      const nextSong = songs[currentIndex + direction];
+      this.playingAlbum = this.activeAlbum;
+      if (nextSong.album) {
+        this.playingAlbum = nextSong.album;
+      }
+      this.$refs.audioPlayer.src = this.toPath(nextSong.name);
       setTimeout(() => {
         this.$refs.audioPlayer.play();
       });
-      this.playingAlbum = this.activeAlbum;
-      this.$store.commit("SET_SONG", nextSong);
+      this.$store.commit("SET_SONG", nextSong.name);
+      this.$store.commit("SET_PLAYING_ALBUM", this.playingAlbum);
       this.$store.commit("SET_ISPLAYING", true);
     },
 
     timeUpdate() {
-      if (this.$refs.audioPlayer.duration && this.canUpdate) {
-        this.timestamp =
-          (this.$refs.audioPlayer.currentTime /
-            this.$refs.audioPlayer.duration) *
-          100;
+      if (this.$refs.audioPlayer.duration) {
+        if (this.canUpdate) {
+          this.timestamp =
+            (this.$refs.audioPlayer.currentTime /
+              this.$refs.audioPlayer.duration) *
+            100;
+        }
+        this.currentTime = new Date(
+          Math.round(this.$refs.audioPlayer.currentTime) * 1000
+        )
+          .toISOString()
+          .substr(14, 5);
+        this.duration = new Date(
+          Math.round(this.$refs.audioPlayer.duration) * 1000
+        )
+          .toISOString()
+          .substr(14, 5);
       }
     },
 
@@ -158,7 +197,14 @@ export default {
     },
   },
   computed: {
-    ...mapState(["isPlaying", "activeAlbum", "activeSong", "songs"]),
+    ...mapState([
+      "isPlaying",
+      "activeAlbum",
+      "activeSong",
+      "songs",
+      "playlistOpen",
+      "playlist",
+    ]),
   },
   watch: {
     volume(value) {
@@ -184,6 +230,15 @@ export default {
   .controls,
   .volume {
     width: 35%;
+  }
+
+  .title {
+    display: flex;
+
+    .time {
+      margin-top: 1.5em;
+      margin-left: 2em;
+    }
   }
 
   .controls {

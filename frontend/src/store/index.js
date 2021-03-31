@@ -9,8 +9,11 @@ export default new Vuex.Store({
     albums: [],
     songs: [],
     activeAlbum: "",
+    playingAlbum: "",
     activeSong: "",
     isPlaying: false,
+    playlist: [],
+    playlistOpen: false,
   },
   mutations: {
     SET_ALBUMS(state, albums) {
@@ -22,6 +25,7 @@ export default new Vuex.Store({
     },
 
     SET_ACTIVE_ALBUM(state, album) {
+      state.playlistOpen = false;
       state.activeAlbum = album;
     },
 
@@ -31,6 +35,18 @@ export default new Vuex.Store({
 
     SET_ISPLAYING(state, bool) {
       state.isPlaying = bool;
+    },
+
+    SET_PLAYLIST(state, playlist) {
+      state.playlist = playlist;
+    },
+
+    TOGGLE_PLAYLIST(state) {
+      state.playlistOpen = !state.playlistOpen;
+    },
+
+    SET_PLAYING_ALBUM(state, album) {
+      state.playingAlbum = album;
     },
   },
   actions: {
@@ -47,11 +63,44 @@ export default new Vuex.Store({
             commit("SET_ACTIVE_ALBUM", payload.name);
           }
         });
+      this.dispatch("fetchPlaylist");
+    },
+
+    fetchPlaylist({ commit }) {
+      axios.get(`${process.env.VUE_APP_API_URL}playlist`).then(({ data }) => {
+        commit("SET_PLAYLIST", data);
+      });
+    },
+
+    addToPlaylist({ dispatch }, song) {
+      axios
+        .post(
+          `${process.env.VUE_APP_API_URL}playlist/add`,
+          JSON.stringify(song)
+        )
+        .then(() => {
+          dispatch("fetchPlaylist");
+        });
+    },
+
+    removeFromPlaylist({ dispatch }, song) {
+      axios
+        .post(
+          `${process.env.VUE_APP_API_URL}playlist/remove`,
+          JSON.stringify(song)
+        )
+        .then(() => {
+          dispatch("fetchPlaylist");
+        });
     },
   },
   getters: {
     song: (state) => (name) => {
       return state.songs.find((song) => song.name == name);
+    },
+
+    songFromPlaylist: (state) => (name) => {
+      return state.playlist.find((song) => song.name == name);
     },
   },
 });

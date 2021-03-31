@@ -4,6 +4,7 @@
     <SongsList></SongsList>
     <Footer></Footer>
     <Background></Background>
+    <Toast></Toast>
   </div>
 </template>
 
@@ -12,6 +13,7 @@ import Nav from "./components/navigation/Nav";
 import SongsList from "./components/songslist/SongsList";
 import Footer from "./components/footer/Footer";
 import Background from "./components/background/Background";
+import Toast from "./components/toast/Toast";
 
 export default {
   name: "App",
@@ -20,6 +22,7 @@ export default {
     SongsList,
     Footer,
     Background,
+    Toast,
   },
   mounted() {
     this.$store.dispatch("fetchData", {

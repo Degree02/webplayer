@@ -3,6 +3,9 @@
     <td class="name">
       <p class="column">{{ song.name }}</p>
     </td>
+    <td v-if="playlistOpen">
+      <p class="column">{{ song.album }}</p>
+    </td>
     <td>
       <p class="column nowrap">
         {{ song.size }}
@@ -15,6 +18,20 @@
         icon="pause"
       ></font-awesome-icon>
       <font-awesome-icon v-else class="icon" icon="play"></font-awesome-icon>
+    </td>
+    <td>
+      <font-awesome-icon
+        v-if="!isInPlaylist && !playlistOpen"
+        @click="add"
+        class="add-remove-icon"
+        icon="plus"
+      ></font-awesome-icon>
+      <font-awesome-icon
+        v-if="playlistOpen"
+        @click="remove"
+        class="add-remove-icon"
+        icon="minus"
+      ></font-awesome-icon>
     </td>
   </tr>
 </template>
@@ -33,16 +50,50 @@ export default {
   },
   computed: {
     song() {
-      return this.$store.getters.song(this.songName);
+      return this.playlistOpen
+        ? this.$store.getters.songFromPlaylist(this.songName)
+        : this.$store.getters.song(this.songName);
     },
-    ...mapState(["isPlaying", "activeSong"]),
+    ...mapState([
+      "isPlaying",
+      "activeSong",
+      "playlist",
+      "playlistOpen",
+      "activeAlbum",
+    ]),
     isActive() {
       return this.songName == this.activeSong ? this.isPlaying : false;
+    },
+    isInPlaylist() {
+      return (
+        this.playlist.findIndex((song) => song.name == this.song.name) > -1
+      );
     },
   },
   methods: {
     clickSong() {
-      EventBus.$emit("changeSong", this.songName);
+      if (!this.song.album) {
+        this.song.album = this.activeAlbum;
+      }
+      EventBus.$emit("changeSong", this.song);
+    },
+
+    add(e) {
+      e.stopPropagation();
+      this.$store.dispatch("addToPlaylist", {
+        album: this.activeAlbum,
+        ...this.song,
+      });
+      EventBus.$emit("toast", `${this.song.name} added to playlist!`);
+    },
+
+    remove(e) {
+      e.stopPropagation();
+      this.$store.dispatch("removeFromPlaylist", {
+        album: this.activeAlbum,
+        ...this.song,
+      });
+      EventBus.$emit("toast", `${this.song.name} removed from playlist!`);
     },
   },
 };
@@ -54,14 +105,26 @@ export default {
   transition: transform 0.2s ease-in-out;
   margin-left: 1em;
 
-  .row:hover & {
+  &:hover {
     transform: $scaling;
   }
 }
 
-.row {
-  cursor: pointer;
+.add-remove-icon {
+  font-size: 1.2em;
+  transition: transform 0.2s ease-in-out;
 
+  &:hover {
+    transform: $scaling;
+  }
+
+  &:active {
+    transition: none;
+    transform: none;
+  }
+}
+
+.row {
   &.active {
     color: $green;
   }
@@ -85,24 +148,23 @@ export default {
       transform: translate(15px);
     }
   }
-}
 
-td {
-  padding: 15px;
-  margin: 0;
-}
+  td {
+    cursor: pointer;
+    padding: 15px;
+    margin: 0;
+    position: relative;
+    font-size: 1.3em;
+    animation: intro 1s forwards;
+    opacity: 0;
 
-td {
-  font-size: 1.3em;
-  animation: intro 1s forwards;
-  opacity: 0;
-
-  &.name {
-    font-weight: bold;
+    &.name {
+      font-weight: bold;
+    }
   }
 }
 
-@for $i from 1 to 4 {
+@for $i from 1 to 5 {
   td:nth-child(#{$i}) {
     animation-delay: $i * 0.15s;
   }

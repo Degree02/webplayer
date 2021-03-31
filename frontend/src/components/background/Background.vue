@@ -8,10 +8,12 @@ import { mapState } from "vuex";
 export default {
   name: "Background",
   computed: {
-    ...mapState(["activeAlbum"]),
+    ...mapState(["playingAlbum", "activeAlbum", "playlistOpen"]),
     href() {
-      if (!this.activeAlbum) return "";
-      return `${process.env.VUE_APP_API_URL}albums/${this.activeAlbum}/img.jpg`;
+      const album = this.playlistOpen ? this.playingAlbum : this.activeAlbum;
+
+      if (!album) return "";
+      return `${process.env.VUE_APP_API_URL}albums/${album}/img.jpg`;
     },
   },
 };
