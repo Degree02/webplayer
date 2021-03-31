@@ -16,5 +16,13 @@ module.exports = {
         if (bytes == 0) return '0 Byte';
         var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
         return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    },
+
+    getClientID(req) {
+        const idCookieRegex = /^clientID=/;
+        if (!req.headers.cookie) return undefined;
+        const idCookie = req.headers.cookie.split('; ').find(cookie => idCookieRegex.test(cookie));
+        if (!idCookie) return undefined;
+        return idCookie.split('=').pop();
     }
 }

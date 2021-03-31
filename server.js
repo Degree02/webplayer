@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const Handler = require("./utils/Handler");
-const { respond, formatSizeUnits } = require('./utils/Helpers');
+const { respond, formatSizeUnits, getClientID } = require('./utils/Helpers');
 const DBInterface = require("./utils/DBInterface");
 
 const PORT = process.env.PORT || 3000;
@@ -53,24 +53,41 @@ handler.post('/files', (req, res) => {
 });
 
 handler.get('/playlist', async (req, res) => {
-    const data = await db.getPlaylist();
+    let clientID = getClientID(req);
+    if (!clientID) {
+        clientID = crypto.randomBytes(32).toString('hex');
+        res.setHeader("Set-Cookie", `clientID=${clientID}; Max-Age=2592000`)
+    }
+    const data = await db.getPlaylist(clientID);
     res.setHeader("Content-Type", "application/json");
-    res.write(JSON.stringify(data));
-    res.end();
+    respond(res, JSON.stringify(data));
 });
 
 handler.post('/playlist/add', async (req, res) => {
-    await db.addSong(req.body);
-    res.end("OK");
+    const client = getClientID(req);
+    if (!client) {
+        respond(res, "Start session first :<");
+        return;
+    }
+    await db.addSong(req.body, client);
+    respond(res, "OK");
 });
 
 handler.post('/playlist/remove', async (req, res) => {
-    await db.removeSong(req.body);
-    res.end("OK");
+    const client = getClientID(req);
+    if (!client) {
+        respond(res, "Start session first :<");
+        return;
+    }
+    await db.removeSong(req.body, client);
+    respond(res, "OK");
 });
 
 const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Headers', 'Set-Cookie')
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     res.setHeader('Accept-Ranges', 'bytes');
 
     handler.passRequest(req, res);

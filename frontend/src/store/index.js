@@ -67,7 +67,8 @@ export default new Vuex.Store({
     },
 
     fetchPlaylist({ commit }) {
-      axios.get(`${process.env.VUE_APP_API_URL}playlist`).then(({ data }) => {
+      axios.get(`${process.env.VUE_APP_API_URL}playlist`, { withCredentials: true }).then(({ data }) => {
+        console.log(data);
         commit("SET_PLAYLIST", data);
       });
     },
@@ -76,7 +77,8 @@ export default new Vuex.Store({
       axios
         .post(
           `${process.env.VUE_APP_API_URL}playlist/add`,
-          JSON.stringify(song)
+          JSON.stringify(song),
+          { withCredentials: true }
         )
         .then(() => {
           dispatch("fetchPlaylist");
@@ -87,7 +89,8 @@ export default new Vuex.Store({
       axios
         .post(
           `${process.env.VUE_APP_API_URL}playlist/remove`,
-          JSON.stringify(song)
+          JSON.stringify(song),
+          { withCredentials: true }
         )
         .then(() => {
           dispatch("fetchPlaylist");
